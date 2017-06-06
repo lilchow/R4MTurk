@@ -1,8 +1,12 @@
-pacman::p_load(tidyverse,MTurkR)
+pacman::p_load(tidyverse,MTurkR,stringr)
 
 EstablishConnection <- function(a,b) {
   Sys.setenv(AWS_ACCESS_KEY_ID=a,AWS_SECRET_ACCESS_KEY=b)
   AccountBalance()
+}
+
+RetrieveExistingQualificationTypes <- function(){
+  SearchQualificationTypes(qualification_type_prefix,return.all = T) %>% .$Name %>% as.character()
 }
 
 CheckNameStatus <- function() {

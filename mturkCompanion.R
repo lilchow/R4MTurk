@@ -1,27 +1,41 @@
-pacman::p_load(tidyverse,MTurkR,stringr)
+pacman::p_load(dplyr,magrittr,stringr,MTurkR,readr,readxl,tibble,svDialogs)
 
-EstablishConnection <- function(a,b) {
+ConnectToMturk <- function(a,b) {
   Sys.setenv(AWS_ACCESS_KEY_ID=a,AWS_SECRET_ACCESS_KEY=b)
   AccountBalance()
 }
 
 RetrieveExistingQualificationTypes <- function(){
-  SearchQualificationTypes(qualification_type_prefix,return.all = T) %>% .$Name %>% as.character()
+  SearchQualificationTypes(qualification_type_prefix,return.all = T) %>% select(Name,QualificationTypeId,CreationTime) %>% map_df(parse_guess) %>% arrange(desc(CreationTime))
 }
 
-CheckNameStatus <- function() {
-  if(paste(qualification_type_prefix,qualification_type_name,sep='.') %in% existing_qualification_type_names){
-    print("This name has already been used before. Go back to the previous step and come up with a new name.")
+DeployAQualificationType <- function(name,isExistant){
+  full_name <- paste(qualification_type_prefix,name,sep='.')
+  if (isExistant){
+    if(full_name %in% existing_qualification_type_table$Name){
+      existing_qualification_type_table %>% 
+        filter(Name==full_name) %>% 
+        .$QualificationTypeId
+    }else{
+      stop('You tried to invoke an existing qualification type but none of the existant qualificaiton types has the name you specified. Change the name and re-run the command.')
+    }
   }else{
-    print("This name is not among existing names. You are safe to proceed.")
+    if(full_name %in% existing_qualification_type_table$Name){
+      stop('You tried to create a new qualification type but the name you specified has been taken by an existant qualification type. Change the name and re-run the command.')
+    }else{
+      CreateQualificationType(
+        name=full_name,
+        description='you received this qualification because you completed one of our surveys',
+        status='Active',
+        auto = FALSE) %>% .$QualificationTypeId %>% as.character()
+    }
+    
   }
 }
 
-RegisterNewQualificationType <- function() {
-  customQual <- CreateQualificationType(
-    name=paste(qualification_type_prefix,qualification_type_name,sep='.'),
-    description=qualification_type_description,
-    status='Active',
-    auto = FALSE)
-  customQual$QualificationTypeId
+AssignDeployedQualificationType <- function(colName){
+  workerIds <- readxl::read_excel(file.choose()) %>% .[[colName]] %>% stringr::str_trim('both')
+  print(deployed_qualification_type)
+  AssignQualification(deployed_qualification_type,workerIds,value=99)
 }
+

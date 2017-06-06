@@ -2,7 +2,7 @@ pacman::p_load(tidyverse,MTurkR)
 
 EstablishConnection <- function(a,b) {
   Sys.setenv(AWS_ACCESS_KEY_ID=a,AWS_SECRET_ACCESS_KEY=b)
-  AccountBalance() #this should output the fund balance on the account
+  AccountBalance()
 }
 
 CheckNameStatus <- function() {

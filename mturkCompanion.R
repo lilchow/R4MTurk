@@ -1,4 +1,4 @@
-pacman::p_load(dplyr,magrittr,stringr,MTurkR,readr,readxl,tibble,svDialogs)
+pacman::p_load(dplyr,magrittr,stringr,MTurkR,readr,readxl,tibble)
 
 ConnectToMturk <- function(a,b) {
   Sys.setenv(AWS_ACCESS_KEY_ID=a,AWS_SECRET_ACCESS_KEY=b)

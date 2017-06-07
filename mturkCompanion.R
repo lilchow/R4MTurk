@@ -5,8 +5,8 @@ ConnectToMturk <- function(a,b) {
   AccountBalance()
 }
 
-RetrieveExistingQualificationTypes <- function(){
-  SearchQualificationTypes(qualification_type_prefix,return.all = T) %>% select(Name,QualificationTypeId,CreationTime) %>% map_df(parse_guess) %>% arrange(desc(CreationTime))
+RetrieveExistingQualificationTypes <- function(prefix){
+  SearchQualificationTypes(prefix,return.all = T) %>% select(Name,QualificationTypeId,CreationTime) %>% map_df(parse_guess) %>% arrange(desc(CreationTime))
 }
 
 DeployAQualificationType <- function(name,isExistant){
@@ -33,9 +33,17 @@ DeployAQualificationType <- function(name,isExistant){
   }
 }
 
-AssignDeployedQualificationType <- function(colName){
-  workerIds <- readxl::read_excel(file.choose()) %>% .[[colName]] %>% stringr::str_trim('both')
-  print(deployed_qualification_type)
+AssignDeployedQualificationType <- function(sheet_path, colName){
+  workerIds <- readxl::read_excel(sheet_path) %>% 
+    .[[colName]] %>% 
+    stringr::str_trim('both')
   AssignQualification(deployed_qualification_type,workerIds,value=99)
 }
+
+AwardBonus <- function(sheet_path,turkID,assignmentID,bonusAmt,bonusReason){
+  df <- readxl::read_excel(sheet_path)
+  GrantBonus(df[[turkID]],df[[assignmentID]],df[[bonusAmt]],df[[bonusReason]])
+}
+
+
 
